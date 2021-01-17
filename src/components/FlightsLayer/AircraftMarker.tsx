@@ -58,7 +58,7 @@ class AircraftMarker extends Component<AircraftMarkerProps> {
     const left: number = -1 * angledIcon.x;
     return L.divIcon({
       html: `<div class="aircraft-icon" style="width:${angledIcon.w}px;height:${angledIcon.h}px;overflow:hidden;position:absolute;background: none;">
-    <img src="../../img/t-sprite_c-yellow_w-30_s-yes.png" style="height:${aircraftIcons.h}px;width:${aircraftIcons.w}px;top:${top}px; left:${left}px; position: absolute;"></div>`,
+    <img src="./img/t-sprite_c-yellow_w-30_s-yes.png" style="height:${aircraftIcons.h}px;width:${aircraftIcons.w}px;top:${top}px; left:${left}px; position: absolute;"></div>`,
     });
   }
 
