@@ -239,7 +239,7 @@ class FlightsLayer extends Component<ComponentPropsWithoutRef<'object'>, Flights
     const { trackLatLngs } = this.state;
     return (
       <>
-        <FlightLayerUpdater updateMapBounds={this.updateMapBounds} />
+        <FlightLayerUpdater updateMapBounds={this.updateMapBounds} showFavoritiesTacks={() => {}} />
         {markers}
         <Polyline positions={trackLatLngs} pathOptions={{ color: 'lime' }} />
       </>

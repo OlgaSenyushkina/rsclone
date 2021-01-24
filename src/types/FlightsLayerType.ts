@@ -15,4 +15,5 @@ export interface TrackLayerUpdaterProps {
 
 export interface FlightLayerUpdaterProps {
   updateMapBounds: (map: Map) => void,
+  showFavoritiesTacks: () => void,
 }
