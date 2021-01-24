@@ -1,4 +1,4 @@
-import { LatLng, LeafletKeyboardEvent } from 'leaflet';
+import { LeafletKeyboardEvent } from 'leaflet';
 import {
   useMapEvents,
 } from 'react-leaflet';
@@ -11,7 +11,6 @@ FlightLayerUpdaterProps): JSX.Element {
     keyup: (event: LeafletKeyboardEvent) => {
       const { originalEvent } = event;
       if (originalEvent.ctrlKey) {
-        const center: LatLng = map.getCenter();
         switch (originalEvent.code) {
           case 'ArrowUp':
             map.panBy([0, -800]);

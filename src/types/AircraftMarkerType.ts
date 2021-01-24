@@ -1,4 +1,4 @@
-import { LatLngExpression } from 'leaflet';
+import { LatLngExpression, LeafletMouseEvent } from 'leaflet';
 
 export interface AircraftMarkerProps {
   position: LatLngExpression,
@@ -7,5 +7,5 @@ export interface AircraftMarkerProps {
   callsign: string,
   aircraftType: string,
   withTrack: boolean,
-  onIconClick: () => void,
+  onIconClick: (event: LeafletMouseEvent) => void,
 }

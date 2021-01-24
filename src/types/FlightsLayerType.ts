@@ -5,8 +5,10 @@ export interface FlightsLayerState {
   supressRequest: boolean,
   aircrafts: AircraftsMap,
   mapBounds: LatLngBounds,
-  trackLatLngs: LatLngExpression[],
-  trackShowingAircraft: string,
+  trackLatLngs: {
+    [key: string]: LatLngExpression[],
+  }
+  trackShowingAircrafts: string[],
 }
 
 export interface TrackLayerUpdaterProps {

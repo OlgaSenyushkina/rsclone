@@ -23,8 +23,8 @@ class FlightsLayer extends Component<ComponentPropsWithoutRef<'object'>, Flights
       supressRequest: false,
       aircrafts: {},
       mapBounds: null,
-      trackLatLngs: [],
-      trackShowingAircraft: null,
+      trackLatLngs: {},
+      trackShowingAircrafts: [],
     };
     this.angleStep = 15;
   }
@@ -56,9 +56,8 @@ class FlightsLayer extends Component<ComponentPropsWithoutRef<'object'>, Flights
         if (!json) {
           return;
         }
-
-        const { aircrafts: aircraftMap, trackShowingAircraft, trackLatLngs } = this.state;
-        let latLngs = [...trackLatLngs];
+        const { aircrafts: aircraftMap, trackShowingAircrafts, trackLatLngs } = this.state;
+        let latLngs = { ...trackLatLngs };
         const newAircraftsMap = { ...aircraftMap };
 
         const filteredResponseKeys = Object.keys(json).filter((key) => !['full_count', 'version'].includes(key));
@@ -111,140 +110,176 @@ class FlightsLayer extends Component<ComponentPropsWithoutRef<'object'>, Flights
             });
             positions.sort((pos1, pos2) => pos2.time_position - pos1.time_position);
             Object.assign(currentAircraftState, { positions });
-            if (flightId === trackShowingAircraft) {
-              latLngs = trackCoordinates(aircraftMap[flightId].positions);
+            if (trackShowingAircrafts.includes(flightId)) {
+              latLngs[flightId] = trackCoordinates(aircraftMap[flightId].positions);
             }
           }
         });
 
-        this.setState({ aircrafts: newAircraftsMap, trackLatLngs: latLngs });
-      });
+    this.setState({ aircrafts: newAircraftsMap, trackLatLngs: latLngs });
+  });
+}
+
+getMarkers(): JSX.Element[] {
+  const { aircrafts, trackShowingAircrafts } = this.state;
+
+  return Object.entries(aircrafts).map(([flightId, aircraft]) => {
+    const longitude = roundCoordinates(aircraft.positions[0].longitude
+      || aircraft.currentPosition.longitude);
+    const latitude = roundCoordinates(aircraft.positions[0].latitude
+      || aircraft.currentPosition.latitude);
+    return (<AircraftMarker
+      key={flightId}
+      position={[latitude, longitude]}
+      altitude={aircraft.positions[0].altitude}
+      trackAngle={aircraft.positions[0].true_track}
+      callsign={aircraft.callsign}
+      aircraftType={aircraft.aircraft_type}
+      withTrack={trackShowingAircrafts.includes(flightId)}
+      onIconClick={(event) => this.aircraftIconClickHandler(
+        flightId,
+        event.originalEvent.ctrlKey,
+      )}
+    />);
+  });
+}
+
+  getTracks(): JSX.Element[] {
+    const { trackLatLngs } = this.state;
+
+    return Object.entries(trackLatLngs).map(([flightId, track]) => (<Polyline
+      key={flightId}
+      positions={track}
+      pathOptions={{ color: 'lime' }}
+    />));
   }
 
-  getMarkers(): JSX.Element[] {
-    const { aircrafts, trackShowingAircraft } = this.state;
+  aircraftIconClickHandler = (flightId: string, append: boolean): void => {
+    const { trackShowingAircrafts } = this.state;
+    if (trackShowingAircrafts.includes(flightId)) {
+      this.hideTrack(flightId);
+  } else {
+    this.showTrack(flightId, append);
+  }
+};
 
-    return Object.entries(aircrafts).map(([flightId, aircraft]) => {
-      const longitude = roundCoordinates(aircraft.positions[0].longitude
-        || aircraft.currentPosition.longitude);
-      const latitude = roundCoordinates(aircraft.positions[0].latitude
-        || aircraft.currentPosition.latitude);
-      return (<AircraftMarker
-        key={flightId}
-        position={[latitude, longitude]}
-        altitude={aircraft.positions[0].altitude}
-        trackAngle={aircraft.positions[0].true_track}
-        callsign={aircraft.callsign}
-        aircraftType={aircraft.aircraft_type}
-        withTrack={trackShowingAircraft === flightId}
-        onIconClick={() => this.aircraftIconClickHandler(flightId)}
-      />);
+showTrack(flightId: string, append: boolean): void {
+  const { trackShowingAircrafts } = this.state;
+  if(!trackShowingAircrafts.includes(flightId)) {
+  const fetchStr = `/api/flightStatus?flightId=${flightId}`;
+  fetch(fetchStr, { method: 'GET', mode: 'no-cors' })
+    .then((resp) => resp.json())
+    .then((json) => {
+      const historicTrail = json.trail.map((itm: {
+        lat: number,
+        lng: number,
+        alt: number,
+        spd: number,
+        ts: number,
+        hd: number
+      }) => ({
+        longitude: itm.lng,
+        latitude: itm.lat,
+        true_track: itm.hd,
+        altitude: itm.alt,
+        velocity: itm.spd,
+        time_position: itm.ts,
+      }));
+
+      this.revealTrack(flightId, true, append, historicTrail);
     });
+}
+this.revealTrack(flightId, false, append, []);
   }
 
-  aircraftIconClickHandler = (flightId: string): void => {
-    const { trackShowingAircraft } = this.state;
-    if (flightId === trackShowingAircraft) {
-      this.hideTrack();
-    } else {
-      this.showTrack(flightId);
-    }
-  };
+toggleSupressRequest = (): void => this.setState((state) => ({
+  supressRequest: !state.supressRequest,
+}));
 
-  showTrack(flightId: string): void {
-    const { trackShowingAircraft } = this.state;
-    if (flightId !== trackShowingAircraft) {
-      const fetchStr = `/api/flightStatus?flightId=${flightId}`;
-      fetch(fetchStr, { method: 'GET', mode: 'no-cors' })
-        .then((resp) => resp.json())
-        .then((json) => {
-          const historicTrail = json.trail.map((itm: {
-            lat: number,
-            lng: number,
-            alt: number,
-            spd: number,
-            ts: number,
-            hd: number
-          }) => ({
-            longitude: itm.lng,
-            latitude: itm.lat,
-            true_track: itm.hd,
-            altitude: itm.alt,
-            velocity: itm.spd,
-            time_position: itm.ts,
-          }));
-
-          this.revealTrack(flightId, true, historicTrail);
-        });
-    }
-    this.revealTrack(flightId, false, []);
+updateMapBounds = (map: Map): void => {
+  const { supressRequest } = this.state;
+  if (supressRequest) {
+    return;
   }
 
-  toggleSupressRequest = (): void => this.setState((state) => ({
-    supressRequest: !state.supressRequest,
-  }));
+  setTimeout(() => this.toggleSupressRequest(), 5000);
 
-  updateMapBounds = (map: Map): void => {
-    const { supressRequest } = this.state;
-    if (supressRequest) {
-      return;
-    }
-
-    setTimeout(() => this.toggleSupressRequest(), 5000);
-
-    this.setState((state) => {
-      if (state.mapBounds === null
-        || !map.getBounds().equals(state.mapBounds)) {
-        return {
-          supressRequest: true,
-          mapBounds: map.getBounds(),
-        };
-      }
+  this.setState((state) => {
+    if (state.mapBounds === null
+      || !map.getBounds().equals(state.mapBounds)) {
       return {
         supressRequest: true,
-        mapBounds: state.mapBounds,
+        mapBounds: map.getBounds(),
       };
-    });
-  };
+    }
+    return {
+      supressRequest: true,
+      mapBounds: state.mapBounds,
+    };
+  });
+};
 
-  hideTrack = (): void => {
-    this.setState({ trackLatLngs: [], trackShowingAircraft: null });
-  };
-
-  revealTrack = (
-    flightId: string,
-    needUpdateTrack: boolean,
-    historicTrail: AircraftPosition[],
-  ): void => {
+  hideTrack = (flightId: string): void => {
     this.setState((state) => {
-      const { aircrafts } = state;
+      const { trackLatLngs, trackShowingAircrafts } = state;
 
-      const aircraft: AircraftState = aircrafts[flightId];
+      const flightIndex = trackShowingAircrafts.indexOf(flightId);
 
-      const joinedTracks = needUpdateTrack ? joinTracks(aircraft.positions, historicTrail)
-        : aircraft.positions;
-
-      if (needUpdateTrack) {
-        aircraft.positions = joinedTracks;
-      }
-
-      const latLngs = trackCoordinates(joinedTracks);
-
-      return { trackLatLngs: latLngs, trackShowingAircraft: flightId };
+      delete trackLatLngs[flightId];
+      trackShowingAircrafts.splice(flightIndex, 1);
+      return { trackLatLngs, trackShowingAircrafts };
     });
-  };
+};
 
-  render(): JSX.Element {
-    const markers = this.getMarkers();
-    const { trackLatLngs } = this.state;
-    return (
-      <>
-        <FlightLayerUpdater updateMapBounds={this.updateMapBounds} showFavoritiesTacks={() => {}} />
-        {markers}
-        <Polyline positions={trackLatLngs} pathOptions={{ color: 'lime' }} />
-      </>
-    );
-  }
+revealTrack = (
+  flightId: string,
+  needUpdateTrack: boolean,
+  append: boolean,
+  historicTrail: AircraftPosition[],
+): void => {
+  this.setState((state) => {
+    const { aircrafts } = state;
+    let { trackLatLngs, trackShowingAircrafts } = state;
+
+    const aircraft: AircraftState = aircrafts[flightId];
+
+    const joinedTracks = needUpdateTrack ? joinTracks(aircraft.positions, historicTrail)
+      : aircraft.positions;
+
+    if (needUpdateTrack) {
+      aircraft.positions = joinedTracks;
+    }
+
+    const latLngs = trackCoordinates(joinedTracks);
+
+    if (append) {
+      if (!trackShowingAircrafts.includes(flightId) && append) {
+        trackShowingAircrafts.push(flightId);
+        trackLatLngs[flightId] = latLngs;
+      }
+    } else {
+      trackShowingAircrafts = Array.of(flightId);
+      trackLatLngs = { [flightId]: latLngs };
+    }
+
+    return { trackLatLngs, trackShowingAircrafts };
+  });
+};
+
+render(): JSX.Element {
+  const markers = this.getMarkers();
+  const tracks = this.getTracks();
+  return (
+    <>
+      <FlightLayerUpdater
+        updateMapBounds={this.updateMapBounds}
+        showFavoritiesTacks={() => { /* TODO */ }}
+      />
+      {markers}
+      {tracks}
+    </>
+  );
+}
 }
 
 export default FlightsLayer;
