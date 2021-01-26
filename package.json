@@ -22,6 +22,7 @@
   "homepage": "https://github.com/lbratkovskaya/flightradar-clone#readme",
   "dependencies": {
     "leaflet": "^1.7.1",
+    "leaflet-contextmenu": "^1.4.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-leaflet": "^3.0.5"
@@ -32,6 +33,7 @@
     "@babel/preset-env": "^7.12.11",
     "@babel/preset-react": "^7.12.10",
     "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
     "@types/react-leaflet": "^2.5.2",
     "@typescript-eslint/eslint-plugin": "^4.11.1",
     "@typescript-eslint/parser": "^4.11.1",
