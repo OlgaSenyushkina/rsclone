@@ -2,7 +2,7 @@ import { LatLngBounds, LatLngExpression, Map } from 'leaflet';
 import { AircraftsMap } from './';
 
 export interface FlightsLayerState {
-  supressRequest: boolean,
+  suppressRequest: boolean,
   aircrafts: AircraftsMap,
   mapBounds: LatLngBounds,
   trackLatLngs: {

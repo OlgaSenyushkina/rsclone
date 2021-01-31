@@ -71,9 +71,10 @@ class AircraftMarker extends Component<AircraftMarkerProps> {
     const angledIcon = currentIcon.rotates ? frame[angle.toString()] : frame['0'];
     const top: number = -1 * angledIcon.y;
     const left: number = -1 * angledIcon.x;
+    const imgSrc = withTrack ? trackingIconPath : nonTrackingIconPath;
     return L.divIcon({
       html: `<div class="aircraft-icon" style="width:${angledIcon.w}px;height:${angledIcon.h}px;overflow:hidden;position:absolute;background:none;">
-      <img src=${withTrack ? trackingIconPath : nonTrackingIconPath} style="height:${aircraftIcons.h}px;width:${aircraftIcons.w}px;top:${top}px; left:${left}px; position: absolute;"></div>`,
+      <img src=${imgSrc} style="height:${aircraftIcons.h}px;width:${aircraftIcons.w}px;top:${top}px; left:${left}px; position: absolute;"></div>`,
       iconSize: [angledIcon.w, angledIcon.h],
       popupAnchor: [0, angledIcon.h / -2],
     });

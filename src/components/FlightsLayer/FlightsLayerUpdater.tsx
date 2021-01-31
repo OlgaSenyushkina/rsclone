@@ -3,6 +3,7 @@ import {
   useMapEvents,
 } from 'react-leaflet';
 import { FlightLayerUpdaterProps } from '../../types/FlightsLayerType';
+import { CTLR_MAP_PAN_INTERVAL } from '../../utils/constants';
 
 export default function FlightLayerUpdater({ updateMapBounds, showFavoritiesTacks }:
 FlightLayerUpdaterProps): JSX.Element {
@@ -13,16 +14,16 @@ FlightLayerUpdaterProps): JSX.Element {
       if (originalEvent.ctrlKey) {
         switch (originalEvent.code) {
           case 'ArrowUp':
-            map.panBy([0, -800]);
+            map.panBy([0, -1 * CTLR_MAP_PAN_INTERVAL]);
             break;
           case 'ArrowDown':
-            map.panBy([0, 800]);
+            map.panBy([0, CTLR_MAP_PAN_INTERVAL]);
             break;
           case 'ArrowLeft':
-            map.panBy([-800, 0]);
+            map.panBy([-1 * CTLR_MAP_PAN_INTERVAL, 0]);
             break;
           case 'ArrowRight':
-            map.panBy([800, 0]);
+            map.panBy([CTLR_MAP_PAN_INTERVAL, 0]);
             break;
           case 'KeyT':
             // TODO

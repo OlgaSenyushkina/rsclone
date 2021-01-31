@@ -19,3 +19,5 @@ export const ICON_SIZE = [20, 20];
 export const ICON_ANCHOR_SIZE = [20, 20];
 
 export const AIRPORT_BLUE_PIN_HTML = '<img src="../../img/airport_pin_40_blue.png" style="height:20px;width:20px;position:absolute;">';
+
+export const CTLR_MAP_PAN_INTERVAL = 800;

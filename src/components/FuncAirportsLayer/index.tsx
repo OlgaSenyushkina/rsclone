@@ -3,11 +3,12 @@ import L, {
   LatLng,
   latLng,
   Marker,
+  PointExpression,
 } from 'leaflet';
 import { useMap } from 'react-leaflet';
 import { AirportType } from '../../types/AirportsLayerType';
 import { roundCoordinates } from '../../utils/apiUtils';
-import { AIRPORT_BLUE_PIN_HTML } from '../../utils/constants';
+import { AIRPORT_BLUE_PIN_HTML, ICON_ANCHOR_SIZE, ICON_SIZE } from '../../utils/constants';
 import 'leaflet-contextmenu';
 import { ContextMenuMap, ExtendedMarkerOptions } from 'leaflet-contextmenu';
 
@@ -54,8 +55,8 @@ export default function FuncAirportsLayer(): JSX.Element {
     const latitude: number = roundCoordinates(airport.lat);
     const icon = L.divIcon({
       html: AIRPORT_BLUE_PIN_HTML,
-      iconSize: [20, 20],
-      iconAnchor: [20, 20],
+      iconSize: ICON_SIZE as PointExpression,
+      iconAnchor: ICON_ANCHOR_SIZE as PointExpression,
     });
 
     const marker: Marker = L.marker([latitude, longitude], {

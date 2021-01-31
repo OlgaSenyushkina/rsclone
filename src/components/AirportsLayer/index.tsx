@@ -60,12 +60,14 @@ class AirportsLayer extends Component<ComponentPropsWithoutRef<'object'>, Airpor
         iconSize: ICON_SIZE as PointExpression,
         iconAnchor: ICON_ANCHOR_SIZE as PointExpression,
       });
-      return (<Marker
-        key={airport.iata}
-        icon={icon}
-        position={[latitude, longitude]}
-        zIndexOffset={airport.alt}
-      />);
+      return (
+        <Marker
+          key={airport.iata}
+          icon={icon}
+          position={[latitude, longitude]}
+          zIndexOffset={airport.alt}
+        />
+      );
     });
   }
 
